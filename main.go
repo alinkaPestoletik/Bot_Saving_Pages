@@ -3,8 +3,9 @@ package main
 import (
 	"BotSavingPages/storage/sqlite"
 	"context"
-	"flag"
+	"github.com/joho/godotenv"
 	"log"
+	"os"
 
 	tgClient "BotSavingPages/clients/telegram"
 	"BotSavingPages/consumer/event-consumer"
@@ -27,7 +28,12 @@ func main() {
 		log.Fatal("can't init sqlite storage", err)
 	}
 
-	botToken := "7286014980:AAHlKmajCsdslVA-KQZCFPYV__cGlAadk50"
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	botToken := os.Getenv("BOT_TOKEN")
 	eventsProcessor := telegram.New(
 		tgClient.New(tgBotHost, botToken),
 		s,
@@ -40,20 +46,4 @@ func main() {
 	if err := consumer.Start(); err != nil {
 		log.Fatal("service is stopped", err)
 	}
-}
-
-func mustToken() string {
-	token := flag.String(
-		"tg-bot-token",
-		"",
-		"token for access to telegram bot",
-	)
-
-	flag.Parse()
-
-	if *token == "" {
-		log.Fatal("token is not specified")
-	}
-
-	return *token
 }
