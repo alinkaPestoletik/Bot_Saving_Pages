@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	HelpCmd  = "/help"
 	StartCmd = "/start"
+	CmdHelp  = "Help"
+	CmdGet   = "Get"
 )
 
 func (p *Processor) doCmd(text string, chatID int, username string) error {
@@ -24,24 +25,26 @@ func (p *Processor) doCmd(text string, chatID int, username string) error {
 	}
 
 	switch text {
-	case HelpCmd:
-		return p.sendHelp(chatID)
 	case StartCmd:
 		return p.sendHelloWithButtons(chatID)
+	case CmdHelp:
+		return p.sendHelp(chatID)
+	case CmdGet:
+		return p.sendRandom(chatID, username)
 	default:
 		return p.tg.SendMessage(chatID, msgUnknownCommand)
 	}
 }
 
 func (p *Processor) sendHelloWithButtons(chatID int) error {
-	inlineKeyboard := [][]telegram.InlineKeyboardButton{
+	inlineKeyboard := [][]telegram.KeyboardButton{
 		{
-			{Text: "Help", CallbackData: "help"},
-			{Text: "Get", CallbackData: "get"},
+			{Text: "Help"},
+			{Text: "Get"},
 		},
 	}
 
-	return p.tg.SendMessageWithInlineKeyboard(chatID, msgHello, inlineKeyboard)
+	return p.tg.SendMessageWithReplyKeyboard(chatID, msgHello, inlineKeyboard)
 }
 
 func (p *Processor) savePage(chatID int, pageURL string, username string) (err error) {

@@ -21,27 +21,26 @@ const (
 	sendMessageMethod = "sendMessage"
 )
 
-// InlineKeyboardButton описывает кнопку в inline-клавиатуре
-type InlineKeyboardButton struct {
-	Text         string `json:"text"`
-	CallbackData string `json:"callback_data,omitempty"`
-	URL          string `json:"url,omitempty"`
+type ReplyKeyboardMarkup struct {
+	Keyboard        [][]KeyboardButton `json:"keyboard"`
+	ResizeKeyboard  bool               `json:"resize_keyboard,omitempty"`
+	OneTimeKeyboard bool               `json:"one_time_keyboard,omitempty"`
+	Selective       bool               `json:"selective,omitempty"`
 }
 
-// InlineKeyboardMarkup описывает inline-клавиатуру
-type InlineKeyboardMarkup struct {
-	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
+type KeyboardButton struct {
+	Text string `json:"text"`
 }
 
-// SendMessageWithInlineKeyboard отправляет сообщение с inline-кнопками
-func (c *Client) SendMessageWithInlineKeyboard(chatID int, text string, keyboard [][]InlineKeyboardButton) error {
-	keyboardMarkup := InlineKeyboardMarkup{
-		InlineKeyboard: keyboard,
+func (c *Client) SendMessageWithReplyKeyboard(chatID int, text string, keyboard [][]KeyboardButton) error {
+	replyMarkup := ReplyKeyboardMarkup{
+		Keyboard:       keyboard,
+		ResizeKeyboard: true,
 	}
 
-	markupJSON, err := json.Marshal(keyboardMarkup)
+	markupJSON, err := json.Marshal(replyMarkup)
 	if err != nil {
-		return err
+		return e.Wrap("can't marshal reply keyboard", err)
 	}
 
 	q := url.Values{}
@@ -49,9 +48,9 @@ func (c *Client) SendMessageWithInlineKeyboard(chatID int, text string, keyboard
 	q.Add("text", text)
 	q.Add("reply_markup", string(markupJSON))
 
-	_, err = c.doRequest(sendMessageMethod, q)
+	_, err = c.doRequest("sendMessage", q)
 	if err != nil {
-		return e.Wrap("can't send message with inline keyboard", err)
+		return e.Wrap("can't send message with reply keyboard", err)
 	}
 
 	return nil

@@ -38,9 +38,9 @@ func (p *Processor) processCallback(event events.Event) error {
 	}
 
 	switch event.Text {
-	case "help":
+	case "Help":
 		return p.sendHelp(meta.ChatID)
-	case "get":
+	case "Get":
 		return p.sendRandom(meta.ChatID, meta.Username)
 	}
 	return ErrUnknownEventType
